@@ -4,8 +4,8 @@
   "name": "lingua-x402-mcp",
   "display_name": "Lingua Detective x402 MCP",
   "version": "0.1.2",
-  "description": "Détection et vérification de langue payées à l'unité (x402, USDC/Solana) — sans compte ni clé API.",
-  "long_description": "Serveur MCP exposant les API payantes de Lingua Detective en paiement à l'unité x402 (USDC sur Solana, gas sponsorisé). Quatre outils : detect_langue (0,002 $), verifier_langue (0,004 $), bundle_check (0,006 $) et credit_topup (montant libre). Deux modes de paiement : wallet payeur (X402_PAYER_KEY_B64) ou crédit prépayé (X402_CREDIT_TOKEN).",
+  "description": "Pay-per-call language detection and verification (x402, USDC/Solana) — no account or API key required.",
+  "long_description": "MCP server exposing Lingua Detective's paid APIs with per-call x402 payments (USDC on Solana, gas sponsored). Four tools: detect_langue ($0.002), verifier_langue ($0.004), bundle_check ($0.006), and credit_topup (flexible amount). Two payment modes: payer wallet (X402_PAYER_KEY_B64) or prepaid credit (X402_CREDIT_TOKEN).",
   "maintainers": ["maximethemens-code"],
   "license": "MIT"
 }
