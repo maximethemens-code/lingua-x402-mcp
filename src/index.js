@@ -12,7 +12,7 @@ import { initialiserPaiement, modePaiement } from './paiement.js';
 import { OUTILS, executerOutil } from './outils.js';
 
 const server = new Server(
-  { name: 'lingua-x402', version: '0.1.0' },
+  { name: 'lingua-x402', version: '0.1.2' },
   { capabilities: { tools: {} } }
 );
 
