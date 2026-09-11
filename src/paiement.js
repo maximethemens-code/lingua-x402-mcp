@@ -49,7 +49,7 @@ export async function appeler({ chemin, methode = 'POST', corps = null }) {
   const url = config.baseUrl + chemin;
   const entetes = {
     'content-type': 'application/json',
-    'user-agent': 'lingua-x402-mcp/0.1.0',
+    'user-agent': 'lingua-x402-mcp/0.1.2',
   };
   if (config.creditToken) entetes['x402-credit'] = config.creditToken;
 
