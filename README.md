@@ -1,41 +1,41 @@
 # Lingua Detective x402 MCP
 
-Serveur MCP exposant les API payantes de Lingua Detective en **paiement à l'unité x402** (USDC sur Solana, gas sponsorisé) : aucun compte, aucune clé API, aucun abonnement. Un agent IA appelle l'outil, paie quelques centimes, reçoit le résultat.
+MCP server exposing Lingua Detective's paid APIs with **per-call x402 payments** (USDC on Solana, gas sponsored): no account, no API key, no subscription. An AI agent calls the tool, pays a few cents, and receives the result.
 
-## Outils (4)
+## Tools (4)
 
-| Outil | Endpoint | Prix |
+| Tool | Endpoint | Price |
 |---|---|---|
-| `detect_langue` | `POST /detect` | **0,002 $** |
-| `verifier_langue` | `POST /verify` | **0,004 $** |
-| `bundle_check` | `POST /v1/bundle/check` | **0,006 $** |
-| `credit_topup` | `POST /v1/credit/topup` | libre (min 0,006 $) |
+| `detect_langue` | `POST /detect` | **$0.002** |
+| `verifier_langue` | `POST /verify` | **$0.004** |
+| `bundle_check` | `POST /v1/bundle/check` | **$0.006** |
+| `credit_topup` | `POST /v1/credit/topup` | flexible (min $0.006) |
 
-## Modes de paiement
+## Payment modes
 
-Le serveur lit sa configuration dans l'environnement. **Deux modes** (dans l'ordre de priorité) :
+The server reads its configuration from the environment. **Two modes** (in priority order):
 
-1. **Crédit prépayé** — `X402_CREDIT_TOKEN` : un jeton opaque obtenu via un top-up
-   (`credit_topup` ou `bundle_check`). Chaque appel débite le crédit **sans** transaction
-   Solana. Idéal pour un volume élevé.
-2. **Wallet payeur** — `X402_PAYER_KEY_B64` : clé privée Solana (64 octets, base64) d'un
-   wallet **financé en USDC** (pas de SOL requis : le gas est sponsorisé par le facilitateur).
-   Chaque appel règle sa transaction x402 automatiquement.
+1. **Prepaid credit** — `X402_CREDIT_TOKEN`: an opaque token obtained via a top-up
+   (`credit_topup` or `bundle_check`). Each call debits the credit **without** a Solana
+   transaction. Ideal for high volume.
+2. **Payer wallet** — `X402_PAYER_KEY_B64`: a Solana private key (64 bytes, base64) of a
+   wallet **funded in USDC** (no SOL required: gas is sponsored by the facilitator).
+   Each call settles its x402 transaction automatically.
 
-Sans l'un ni l'autre, les outils renvoient le **challenge 402 décodé** (montant, adresse
-`payTo`, réseau) afin que l'agent comprenne ce qui est demandé.
+With neither, the tools return the **decoded 402 challenge** (amount, `payTo` address,
+network) so the agent understands what is being requested.
 
-### Variables d'environnement
+### Environment variables
 
-| Variable | Rôle | Défaut |
+| Variable | Role | Default |
 |---|---|---|
-| `X402_BASE_URL` | Base de l'API payante | `https://linguadetective.com` |
+| `X402_BASE_URL` | Paid API base URL | `https://linguadetective.com` |
 | `X402_NETWORK` | `mainnet` \| `devnet` | `mainnet` |
-| `X402_PAYER_KEY_B64` | Wallet payeur (secret key 64 octets, base64) | — |
-| `X402_CREDIT_TOKEN` | Jeton de crédit prépayé | — |
-| `X402_TRUSTED_PAYTO` | Verrouille le destinataire (anti-détournement) | — |
-| `X402_FACILITATOR_URL` | Facilitateur x402 (Dexter) | `https://x402.dexter.cash` |
-| `X402_RPC_URL` | RPC Solana (fallback blockhash) | mainnet-beta public |
+| `X402_PAYER_KEY_B64` | Payer wallet (64-byte secret key, base64) | — |
+| `X402_CREDIT_TOKEN` | Prepaid credit token | — |
+| `X402_TRUSTED_PAYTO` | Locks the recipient (anti-misdirection) | — |
+| `X402_FACILITATOR_URL` | x402 facilitator (Dexter) | `https://x402.dexter.cash` |
+| `X402_RPC_URL` | Solana RPC (blockhash fallback) | public mainnet-beta |
 
 ## Installation
 
@@ -48,7 +48,7 @@ Sans l'un ni l'autre, les outils renvoient le **challenge 402 décodé** (montan
       "command": "npx",
       "args": ["-y", "lingua-x402-mcp"],
       "env": {
-        "X402_PAYER_KEY_B64": "<votre clé privée base64>",
+        "X402_PAYER_KEY_B64": "<your base64 private key>",
         "X402_TRUSTED_PAYTO": "H3NuGHu9mpGgscj2DWtrs699PWdovPUicy2N9dDaYLTk"
       }
     }
@@ -56,9 +56,9 @@ Sans l'un ni l'autre, les outils renvoient le **challenge 402 décodé** (montan
 }
 ```
 
-### Cursor / autres clients stdio
+### Cursor / other stdio clients
 
-Ajoutez la même entrée `command: npx`, `args: ["-y", "lingua-x402-mcp"]` avec vos `env`.
+Add the same `command: npx`, `args: ["-y", "lingua-x402-mcp"]` entry with your `env`.
 
 ### Local
 
@@ -67,24 +67,24 @@ git clone https://github.com/maximethemens-code/lingua-x402-mcp && cd lingua-x40
 X402_PAYER_KEY_B64=... npm start   # npm start = node src/index.js
 ```
 
-## Exemple d'appel
+## Example call
 
 ```
 detect_langue { text: "Bonjour tout le monde, ceci est une phrase en français." }
-→ { "langues": [ { "code": "fra", "nom": "français", ... } ], ... }   (0,002 $ USDC débité)
+→ { "langues": [ { "code": "fra", "nom": "français", ... } ], ... }   ($0.002 USDC debited)
 ```
 
-## Sécurité
+## Security
 
-- `X402_PAYER_KEY_B64` n'est **jamais** transmis au serveur : il ne sert qu'à signer la
-  transaction localement.
-- `X402_TRUSTED_PAYTO` est fortement recommandé : il empêche le wallet de payer un
-  destinataire inattendu (ex. si `X402_BASE_URL` pointe vers un serveur malveillant).
-- Le wallet de paiement doit être distinct du wallet de réception (`payTo`).
+- `X402_PAYER_KEY_B64` is **never** sent to the server: it is only used to sign the
+  transaction locally.
+- `X402_TRUSTED_PAYTO` is strongly recommended: it prevents the wallet from paying an
+  unexpected recipient (e.g. if `X402_BASE_URL` points to a malicious server).
+- The payment wallet must be distinct from the receiving wallet (`payTo`).
 
-## Limites connues
+## Known limitations
 
-- La détection est **hors-ligne** (bibliothèque `franc`, 186 langues, codes ISO 639-3) :
-  pas d'appel réseau, mais un texte trop court (< 10 caractères) renvoie une erreur.
-- Le règlement réel on-chain (verify/settle via Dexter) n'est exercé qu'avec un wallet
-  effectivement financé en USDC.
+- Detection is **offline** (the `franc` library, 186 languages, ISO 639-3 codes):
+  no network call, but a text that is too short (< 10 characters) returns an error.
+- Real on-chain settlement (verify/settle via Dexter) is only exercised with a wallet
+  actually funded in USDC.
